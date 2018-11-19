@@ -1,0 +1,5 @@
+bases:
+- ../base
+- ../../services/first/kustomize/production
+- ../../services/second/kustomize/production
+- ../../services/ignored/kustomize/production

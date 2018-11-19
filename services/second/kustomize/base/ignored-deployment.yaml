@@ -1,0 +1,25 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ignored
+  labels:
+    app: ignored
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ignored
+  template:
+    metadata:
+      labels:
+        app: ignored
+    spec:
+      containers:
+        - name: ignored
+          image: docker.io/hashicorp/http-echo:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP

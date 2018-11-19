@@ -1,0 +1,3 @@
+resources:
+- second-deployment.yaml
+- second-service.yaml

@@ -1,0 +1,3 @@
+resources:
+- first-deployment.yaml
+- first-service.yaml

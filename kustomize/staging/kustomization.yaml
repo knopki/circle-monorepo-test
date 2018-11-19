@@ -1,0 +1,5 @@
+bases:
+- ../base
+- ../../services/first/kustomize/staging
+- ../../services/second/kustomize/staging
+- ../../services/ignored/kustomize/staging

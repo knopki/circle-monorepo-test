@@ -1,0 +1,3 @@
+resources:
+- ignored-deployment.yaml
+- ignored-service.yaml
