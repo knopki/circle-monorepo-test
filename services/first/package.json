@@ -5,7 +5,7 @@
   "private": true,
   "engineStrict": true,
   "engines": {
-    "node": ">=8.9"
+    "node": ">=8.10"
   },
   "scripts": {
     "start": "node dist/app.js",

@@ -179,7 +179,7 @@ jobs:
             if [ -e .project-metadata/.project-kustomize-changed ]; then
               echo "Kustomize build"
             else
-              echo "Service Second is unchanged"
+              echo "Kustomize is unchanged"
             fi
 
       - run:
@@ -188,7 +188,7 @@ jobs:
             if [ -e .project-metadata/.project-kustomize-changed ]; then
               echo "k8s lint"
             else
-              echo "Service Second is unchanged"
+              echo "Kustomize is unchanged"
             fi
 
       - run:
@@ -200,7 +200,7 @@ jobs:
                 echo "Deploying to production"
               fi
             else
-              echo "Service Second is unchanged"
+              echo "Kustomize is unchanged"
             fi
 
 workflows:
