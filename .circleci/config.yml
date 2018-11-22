@@ -1,0 +1,221 @@
+version: 2
+
+defaults: &defaults
+  docker:
+    - image: circleci/node:8.2.1
+
+jobs:
+  clone_and_hash:
+    <<: *defaults
+    working_directory: ~/circle-monorepo-test
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-project-metadata-{{ .Branch }}
+            - v1-project-metadata-master
+
+      - run:
+          name: Initialize project metadata
+          command: |
+            mkdir -p .project-metadata
+            touch .project-{kustomize,first,second}-hash
+      - run:
+          name: Hash projects
+          command: |
+            git log --pretty=format:'%H' -n 1 -- \
+              kustomize \
+              services/first/kustomize \
+              services/second/kustomize > .project-kustomize-hash.new
+            git log --pretty=format:'%H' -n 1 -- \
+              yarn.lock \
+              package.json \
+              services/first > .project-first-hash.new
+            git log --pretty=format:'%H' -n 1 -- \
+              yarn.lock \
+              package.json \
+              services/second > .project-second-hash.new
+      - run:
+          name: Determine changed projects
+          command: |
+            if ! diff .project-kustomize-hash{,.new} > /dev/null; then
+              touch .project-metadata/.project-kustomize-changed
+            fi
+            if ! diff .project-first-hash{,.new} > /dev/null; then
+              touch .project-metadata/.project-first-changed
+            fi
+            if ! diff .project-second-hash{,.new} > /dev/null; then
+              touch .project-metadata/.project-second-changed
+            fi
+      - run:
+          name: Set current project hashes
+          command: |
+            mv .project-kustomize-hash{.new,}
+            mv .project-first-hash{.new,}
+            mv .project-second-hash{.new,}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .project-metadata
+
+      - save_cache:
+          key: v1-project-metadata-{{ .Branch }}-{{ epoch }}
+          paths:
+            - .project-kustomize-hash
+            - .project-first-hash
+            - .project-second-hash
+
+  service_first:
+    <<: *defaults
+    working_directory: ~/circle-monorepo-test/services/first
+    steps:
+      - checkout: { path: ~/circle-monorepo-test }
+      - attach_workspace: { at: . }
+      - run:
+          name: Project First - install dependencies
+          command: |
+            if [ -e .project-metadata/.project-first-changed ]; then
+              yarn
+            else
+              echo "Service First is unchanged"
+            fi
+
+      - run:
+          name: Project First - Build
+          command: |
+            if [ -e .project-metadata/.project-first-changed ]; then
+              yarn build
+            else
+              echo "Service First is unchanged"
+            fi
+
+      - run:
+          name: Project First - Test
+          command: |
+            if [ -e .project-metadata/.project-first-changed ]; then
+              echo "run tests"
+            else
+              echo "Service First is unchanged"
+            fi
+
+      - run:
+          name: Project First - Build image
+          command: |
+            if [ -e .project-metadata/.project-first-changed ]; then
+              echo "build image"
+            else
+              echo "Service First is unchanged"
+            fi
+
+      - run:
+          name: Project First - Push image
+          command: |
+            if [ -e .project-metadata/.project-first-changed ]; then
+              echo "push image"
+            else
+              echo "Service First is unchanged"
+            fi
+
+  service_second:
+    <<: *defaults
+    working_directory: ~/circle-monorepo-test/services/second
+    steps:
+      - checkout: { path: ~/circle-monorepo-test }
+      - attach_workspace: { at: . }
+      - run:
+          name: Project Second - install dependencies
+          command: |
+            if [ -e .project-metadata/.project-second-changed ]; then
+              yarn
+            else
+              echo "Service Second is unchanged"
+            fi
+
+      - run:
+          name: Project Second - Build
+          command: |
+            if [ -e .project-metadata/.project-second-changed ]; then
+              yarn build
+            else
+              echo "Service Second is unchanged"
+            fi
+
+      - run:
+          name: Project Second - Test
+          command: |
+            if [ -e .project-metadata/.project-second-changed ]; then
+              echo "run tests"
+            else
+              echo "Service Second is unchanged"
+            fi
+
+      - run:
+          name: Project Second - Build image
+          command: |
+            if [ -e .project-metadata/.project-second-changed ]; then
+              echo "build image"
+            else
+              echo "Service Second is unchanged"
+            fi
+
+      - run:
+          name: Project Second - Push image
+          command: |
+            if [ -e .project-metadata/.project-second-changed ]; then
+              echo "push image"
+            else
+              echo "Service Second is unchanged"
+            fi
+
+  deploy:
+    <<: *defaults
+    working_directory: ~/circle-monorepo-test
+    steps:
+      - checkout: { path: ~/circle-monorepo-test }
+      - attach_workspace: { at: . }
+      - run:
+          name: Kustomize - build
+          command: |
+            if [ -e .project-metadata/.project-kustomize-changed ]; then
+              echo "Kustomize build"
+            else
+              echo "Service Second is unchanged"
+            fi
+
+      - run:
+          name: k8s - lint
+          command: |
+            if [ -e .project-metadata/.project-kustomize-changed ]; then
+              echo "k8s lint"
+            else
+              echo "Service Second is unchanged"
+            fi
+
+      - run:
+          name: k8s - deploy
+          command: |
+            if [ -e .project-metadata/.project-kustomize-changed ]; then
+              if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                echo "Deploying to staging"
+                echo "Deploying to production"
+              fi
+            else
+              echo "Service Second is unchanged"
+            fi
+
+workflows:
+  version: 2
+
+  build_test_deploy:
+    jobs:
+      - clone_and_hash
+      - service_first:
+          requires:
+            - clone_and_hash
+      - service_second:
+          requires:
+            - clone_and_hash
+      - deploy:
+          requires:
+            - service_first
+            - service_second
