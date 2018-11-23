@@ -30,11 +30,13 @@ jobs:
             git log --pretty=format:'%H' -n 1 -- \
               yarn.lock \
               package.json \
-              services/first > .project-first-hash.new
+              services/first \
+              ":(exclude)services/first/kustomize" > .project-first-hash.new
             git log --pretty=format:'%H' -n 1 -- \
               yarn.lock \
               package.json \
-              services/second > .project-second-hash.new
+              services/second \
+              ":(exclude)services/second/kustomize" > .project-second-hash.new
       - run:
           name: Determine changed projects
           command: |
