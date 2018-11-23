@@ -74,47 +74,32 @@ jobs:
       - run:
           name: Project First - install dependencies
           command: |
-            if [ -e .project-metadata/.project-first-changed ]; then
-              yarn
-            else
-              echo "Service First is unchanged"
-            fi
+            [ -e .project-metadata/.project-first-changed ] || exit 0
+            yarn
 
       - run:
           name: Project First - Build
           command: |
-            if [ -e .project-metadata/.project-first-changed ]; then
-              yarn build
-            else
-              echo "Service First is unchanged"
-            fi
+            [ -e .project-metadata/.project-first-changed ] || exit 0
+            yarn build
 
       - run:
           name: Project First - Test
           command: |
-            if [ -e .project-metadata/.project-first-changed ]; then
-              echo "run tests"
-            else
-              echo "Service First is unchanged"
-            fi
+            [ -e .project-metadata/.project-first-changed ] || exit 0
+            echo "run tests"
 
       - run:
           name: Project First - Build image
           command: |
-            if [ -e .project-metadata/.project-first-changed ]; then
-              echo "build image"
-            else
-              echo "Service First is unchanged"
-            fi
+            [ -e .project-metadata/.project-first-changed ] || exit 0
+            echo "build image"
 
       - run:
           name: Project First - Push image
           command: |
-            if [ -e .project-metadata/.project-first-changed ]; then
-              echo "push image"
-            else
-              echo "Service First is unchanged"
-            fi
+            [ -e .project-metadata/.project-first-changed ] || exit 0
+            echo "push image"
 
   service_second:
     <<: *defaults
@@ -125,47 +110,32 @@ jobs:
       - run:
           name: Project Second - install dependencies
           command: |
-            if [ -e .project-metadata/.project-second-changed ]; then
-              yarn
-            else
-              echo "Service Second is unchanged"
-            fi
+            [ -e .project-metadata/.project-second-changed ] || exit 0
+            yarn
 
       - run:
           name: Project Second - Build
           command: |
-            if [ -e .project-metadata/.project-second-changed ]; then
-              yarn build
-            else
-              echo "Service Second is unchanged"
-            fi
+            [ -e .project-metadata/.project-second-changed ] || exit 0
+            yarn build
 
       - run:
           name: Project Second - Test
           command: |
-            if [ -e .project-metadata/.project-second-changed ]; then
-              echo "run tests"
-            else
-              echo "Service Second is unchanged"
-            fi
+            [ -e .project-metadata/.project-second-changed ] || exit 0
+            echo "run tests"
 
       - run:
           name: Project Second - Build image
           command: |
-            if [ -e .project-metadata/.project-second-changed ]; then
-              echo "build image"
-            else
-              echo "Service Second is unchanged"
-            fi
+            [ -e .project-metadata/.project-second-changed ] || exit 0
+            echo "build image"
 
       - run:
           name: Project Second - Push image
           command: |
-            if [ -e .project-metadata/.project-second-changed ]; then
-              echo "push image"
-            else
-              echo "Service Second is unchanged"
-            fi
+            [ -e .project-metadata/.project-second-changed ] || exit 0
+            echo "push image"
 
   deploy:
     <<: *defaults
@@ -176,32 +146,22 @@ jobs:
       - run:
           name: Kustomize - build
           command: |
-            if [ -e .project-metadata/.project-kustomize-changed ]; then
-              echo "Kustomize build"
-            else
-              echo "Kustomize is unchanged"
-            fi
+            [ -e .project-metadata/.project-kustomize-changed ] || exit 0
+            echo "Kustomize build"
 
       - run:
           name: k8s - lint
           command: |
-            if [ -e .project-metadata/.project-kustomize-changed ]; then
-              echo "k8s lint"
-            else
-              echo "Kustomize is unchanged"
-            fi
+            [ -e .project-metadata/.project-kustomize-changed ] || exit 0
+            echo "k8s lint"
 
       - run:
           name: k8s - deploy
           command: |
-            if [ -e .project-metadata/.project-kustomize-changed ]; then
-              if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                echo "Deploying to staging"
-                echo "Deploying to production"
-              fi
-            else
-              echo "Kustomize is unchanged"
-            fi
+            [ -e .project-metadata/.project-kustomize-changed ] || exit 0
+            [ "${CIRCLE_BRANCH}" == "master" ] || exit 0
+            echo "Deploying to staging"
+            echo "Deploying to production"
 
 workflows:
   version: 2
